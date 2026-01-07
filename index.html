@@ -1,54 +1,71 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>中3天体観測メタバース</title>
-  <meta name="description" content="Multiplayer Astronomy Metaverse">
-  
-  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.slim.js"></script>
-  <script src="https://unpkg.com/networked-aframe@^0.12.0/dist/networked-aframe.min.js"></script>
-  <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
-  <script src="/js/main.js"></script> </head>
-<body>
+// --- Three.js 基本設定 ---
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-  <a-scene networked-scene="
-    room: astronomy-room;
-    debug: true;
-    adapter: wse;
-  ">
-  
-    <a-assets>
-      <template id="avatar-template">
-        <a-entity class="avatar">
-          <a-sphere class="head"
-            color="#555"
-            scale="0.45 0.5 0.4"
-            random-color
-          ></a-sphere>
-          <a-entity class="body"
-            geometry="primitive: cylinder; radius: 0.5; height: 1.5"
-            position="0 -1 0"
-            material="color: #FFF"
-          ></a-entity>
-          <a-box color="yellow" position="0 0 -0.5" scale="0.1 0.1 0.1"></a-box>
-        </a-entity>
-      </template>
-    </a-assets>
+// --- 1. 中3理科：天体（星空）の作成 ---
+// 巨大な球体の内側に星のテクスチャを貼る、または点（Points）で表現します
+function createStarfield() {
+    const vertices = [];
+    for (let i = 0; i < 5000; i++) {
+        const x = THREE.MathUtils.randFloatSpread(2000);
+        const y = THREE.MathUtils.randFloatSpread(2000);
+        const z = THREE.MathUtils.randFloatSpread(2000);
+        vertices.push(x, y, z);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    const material = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.7 });
+    const stars = new THREE.Points(geometry, material);
+    scene.add(stars);
+}
+createStarfield();
 
-    <a-sky color="#000010"></a-sky>
-    <a-grid material="src: https://cdn.glitch.com/b870d9ec-1139-44f9-b462-22fa8871605d%2Fgrid.png?v=1560662726550; repeat: 40 40" scale="40 40 1" rotation="-90 0 0" position="0 -1 0"></a-grid>
+// --- 2. キャラクター（アバター）の管理 ---
+const avatars = {}; // 他の参加者を保存するオブジェクト
+const myAvatar = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2, 1),
+    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+);
+scene.add(myAvatar);
 
-    <a-entity id="player"
-      networked="template: #avatar-template; attachTemplateToLocal: false;"
-      camera
-      position="0 1.6 0"
-      wasd-controls look-controls>
-      <a-entity class="head"
-        visible="false"
-        random-color
-      ></a-entity>
-    </a-entity>
+// --- 3. リアルタイム同期 (Socket.io) ---
+const socket = io(); // サーバーへ接続
+
+// 自分の移動をサーバーに伝える
+function updateMovement() {
+    // キー入力に応じて myAvatar.position を変更
+    // ... (移動ロジック)
+    socket.emit('move', {
+        x: myAvatar.position.x,
+        y: myAvatar.position.y,
+        z: myAvatar.position.z
+    });
+}
+
+// 他の人の移動を受け取る
+socket.on('user_moved', (data) => {
+    if (!avatars[data.id]) {
+        // 新しいユーザーならアバターを作成
+        avatars[data.id] = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 2, 1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        );
+        scene.add(avatars[data.id]);
+    }
+    // 位置を更新
+    avatars[data.id].position.set(data.x, data.y, data.z);
+});
+
+// ループ処理
+function animate() {
+    requestAnimationFrame(animate);
+    updateMovement();
+    renderer.render(scene, camera);
+}
+animate();
 
   </a-scene>
 </body>
