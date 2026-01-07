@@ -1,17 +1,55 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>science-labo</title>
-    
-    <link rel="stylesheet" href="css/style.css">
-</head>
+  <meta charset="utf-8">
+  <title>中3天体観測メタバース</title>
+  <meta name="description" content="Multiplayer Astronomy Metaverse">
+  
+  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.slim.js"></script>
+  <script src="https://unpkg.com/networked-aframe@^0.12.0/dist/networked-aframe.min.js"></script>
+  <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+  <script src="/js/main.js"></script> </head>
 <body>
 
-    <h1>science-labo へようこそ！</h1>
-    <p>GitHubでウェブサイトを制作中です。</p>
+  <a-scene networked-scene="
+    room: astronomy-room;
+    debug: true;
+    adapter: wse;
+  ">
+  
+    <a-assets>
+      <template id="avatar-template">
+        <a-entity class="avatar">
+          <a-sphere class="head"
+            color="#555"
+            scale="0.45 0.5 0.4"
+            random-color
+          ></a-sphere>
+          <a-entity class="body"
+            geometry="primitive: cylinder; radius: 0.5; height: 1.5"
+            position="0 -1 0"
+            material="color: #FFF"
+          ></a-entity>
+          <a-box color="yellow" position="0 0 -0.5" scale="0.1 0.1 0.1"></a-box>
+        </a-entity>
+      </template>
+    </a-assets>
 
-    <script src="js/main.js"></script>
+    <a-sky color="#000010"></a-sky>
+    <a-grid material="src: https://cdn.glitch.com/b870d9ec-1139-44f9-b462-22fa8871605d%2Fgrid.png?v=1560662726550; repeat: 40 40" scale="40 40 1" rotation="-90 0 0" position="0 -1 0"></a-grid>
+
+    <a-entity id="player"
+      networked="template: #avatar-template; attachTemplateToLocal: false;"
+      camera
+      position="0 1.6 0"
+      wasd-controls look-controls>
+      <a-entity class="head"
+        visible="false"
+        random-color
+      ></a-entity>
+    </a-entity>
+
+  </a-scene>
 </body>
 </html>
