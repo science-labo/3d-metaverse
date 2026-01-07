@@ -1,0 +1,38 @@
+#character-creator {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 100;
+}
+
+.shape-btn {
+    background: #444;
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.shape-btn.active {
+    background: #00ffcc;
+    color: #000;
+}
+
+#enter-btn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #00ffcc;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+}
